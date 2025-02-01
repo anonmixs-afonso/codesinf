@@ -15,46 +15,63 @@ class Cliente():
         self.__port = port
         self.__tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    
     def start(self):
         """
         Método que inicializa a execução do Cliente
         """
-        endpoint = (self.__server_ip,self.__port)
+        endpoint = (self.__server_ip, self.__port)
         try:
             self.__tcp.connect(endpoint)
             print("Conexão realizada com sucesso!")
             self.__method()
-        except:
-            print("Servidor não disponível")
+        except Exception as e:
+            print(f"Servidor não disponível: {e}")
 
-    
     def __method(self):
         """
         Método que implementa as requisições do cliente
         """
         try:
-            msg = ''
             while True:
-
-                # leitura da imagem
-                caminho_imagem = '/home/anon/temp_to_transfer/Programs/INF_INDS/Cpp_Inf_Inds/Codes_in_Class/InformaticaIndustrialUFJF/Python/Python 3/ExemploProcessamentoImagem/a.jpg'
+                # Leitura da imagem
+                caminho_imagem = '/home/anon/Documents/Gits/GitInf_Gitkraken/codesinf/Python_Inf_Inds/aulas/aula14/client/a.jpg'
                 img = cv2.imread(caminho_imagem)
 
-                # codificação para bytes
-                _, img_bytes = cv2.imencode('.jpg', img) 
-                img_bytes = bytes(img_bytes)
-                tamanho_da_imagem_codificado = len(img_bytes).to_bytes(4, 'big')             
+                # Codificação para bytes
+                _, img_bytes = cv2.imencode('.jpg', img)
+                img_bytes = img_bytes.tobytes()  # Convert to byte string
+                tamanho_da_imagem_codificado = len(img_bytes).to_bytes(4, 'big')
 
-                # decodificação
-                tam = int.from_bytes(tamanho_da_imagem_codificado, 'big')
-                img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-               
-                self.__tcp.send(bytes(str(tam),'ascii'))
-                self.__tcp.send(bytes(str(img),'ascii'))
+                # Enviar tamanho da imagem
+                self.__tcp.send(tamanho_da_imagem_codificado)
 
-                resp = self.__tcp.recv(1024)
-                print("= ",resp.decode('ascii'))
+                # Enviar a imagem em partes
+                total_sent = 0
+                chunk_size = 1024
+                while total_sent < len(img_bytes):
+                    chunk = img_bytes[total_sent:total_sent + chunk_size]
+                    self.__tcp.send(chunk)
+                    total_sent += len(chunk)
+
+                # Receber a imagem processada
+                tamproc = int.from_bytes(self.__tcp.recv(4), 'big')
+                img_bytes = b''
+                total_rec = 0
+                while total_rec < tamproc:
+                    chunk = self.__tcp.recv(1024)
+                    img_bytes += chunk
+                    total_rec += len(chunk)
+
+                # Decodificar a imagem recebida
+                processed_img = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+
+                # Exibir imagem processada
+                cv2.imshow('Imagem Processada', processed_img)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
+                print("Imagem processada recebida com sucesso!")
+
             self.__tcp.close()
         except Exception as e:
             print("Erro ao realizar comunicação com o servidor", e.args)
