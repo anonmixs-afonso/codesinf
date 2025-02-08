@@ -1,6 +1,7 @@
 from pyModbusTCP.server import DataBank, ModbusServer
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from pymodbus.constants import Endian
+import time
 
 class Serverinit:
     def __init__(self, host, port):
@@ -23,6 +24,7 @@ class Serverinit:
 
                 #getting coils
                 print(f'The value of the coil in the Address 0: {self.db.get_coils(0)}')
+                time.sleep(1)
             
         except Exception as e:
             print(f'Error: {e.args}.\n')

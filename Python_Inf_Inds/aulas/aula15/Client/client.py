@@ -1,6 +1,7 @@
 from pyModbusTCP.client import ModbusClient
 from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 from pymodbus.constants import Endian
+import numpy as np
 
 class Clientinit:
 
@@ -24,6 +25,8 @@ class Clientinit:
                 if (int(typreg) == 2):
                     addr = input("Address of the holding register in the MODBUS table: ")
                     print(f'The value in {addr} is {self.readvalue(int(addr), int(typreg))}. \n')
+                    print(f'The value in binary is {self.readbitholding(int(addr), int(typreg))}. \n')
+
             
             if (int(ch) == 2):
                 typreg = input("Choose: 1- Write coil, 2- Write holding registers: ")
@@ -37,6 +40,8 @@ class Clientinit:
                     addr = input("Address of the holding register in the MODBUS table: ")
                     val = input("Value to write: ")
                     self.writevalue(int(addr), int(typreg), int(val))
+                    listt = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                    print(self.writebitholding(int(addr), listt))
 
 
         except Exception as e:
@@ -44,9 +49,28 @@ class Clientinit:
 
     def readvalue (self, addr, typ):
         if (int(typ) == 1):
+            # decoder = BinaryPayloadDecoder(payload=self.modclient.read_coils(addr, 1), byteorder=Endian.LITTLE)
+            # val = decoder.decode_32bit_float()
             return self.modclient.read_coils(addr, 1)[0]
         if (int(typ) == 2):
-            return self.modclient.read_holding_registers(addr, 1)[0]
+            # return self.modclient.read_holding_registers(addr, 2)
+            decoder = BinaryPayloadDecoder(payload=self.modclient.read_holding_registers(addr, 2), byteorder=Endian.LITTLE)
+            val = decoder.decode_32bit_float()
+            return val
+
+    def readbitholding (self, addr):
+        decoder = BinaryPayloadDecoder(payload=self.modclient.read_holding_registers(addr, 2), byteorder=Endian.LITTLE)
+        val = decoder.decode_32bit_float()
+        binary = np.binary_repr(np.float16(val).view(np.int16), width=16)
+        listbit = list(str(binary))
+        intlistbit = [int(c) for c in listbit] 
+        return intlistbit
+
+    def writebitholding (self, addr, listbitrec):
+        listabit = self.readbitholding(addr)
+        listaux = [a & b for a, b in zip (listbitrec, listabit)]
+        listasw = [a | b for a, b in zip (listaux, listbitrec)]
+        return listasw
 
     def writevalue (self, addr, typ, val):
         if (int(typ) == 1):
