@@ -1,9 +1,13 @@
 from pyModbusTCP.client import ModbusClient
+from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
+from pymodbus.constants import Endian
 
 class Clientinit:
 
     def __init__ (self, host, port):
         self.modclient = ModbusClient(host=host, port=port)
+        self.floatload = BinaryPayloadBuilder(byteorder=Endian.BIG)
+        self.payload = 0
 
     def ihmcli (self):
 
@@ -48,4 +52,6 @@ class Clientinit:
         if (int(typ) == 1):
             return self.modclient.write_single_coil(addr, val)
         if (int(typ) == 2):
-            return self.modclient.write_single_register(addr, val)        
+            self.floatload.add_32bit_float(val)
+            self.payload = self.floatload.to_registers()
+            return self.modclient.write_multiple_registers(addr, self.payload)       
