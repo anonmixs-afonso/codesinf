@@ -17,7 +17,7 @@ class Clientinit:
             print("Welcome to SCADA CLI: \n")
             ch = input("Choose what to do: 1- Read values from registers, 2- Write values to register: ")
             if (int(ch) == 1):
-                typreg = input("Choose: 1- Read coil, 2- Read holding registers: ")
+                typreg = input("Choose: 1- Read coil, 2- Read holding registers, 3- Read holding registers bits: ")
                 if (int(typreg) == 1):
                     addr = input("Address of the coil in the MODBUS table: ")
                     print(f'The value in {addr} is {self.readvalue(int(addr), int(typreg))}. \n')
@@ -25,11 +25,13 @@ class Clientinit:
                 if (int(typreg) == 2):
                     addr = input("Address of the holding register in the MODBUS table: ")
                     print(f'The value in {addr} is {self.readvalue(int(addr), int(typreg))}. \n')
-                    print(f'The value in binary is {self.readbitholding(int(addr), int(typreg))}. \n')
 
+                if (int(typreg) == 3):
+                    addr = input("Address of the holding register in the MODBUS table: ")
+                    print(f'The value in binary is {self.readbitholding(int(addr))}. \n')                 
             
             if (int(ch) == 2):
-                typreg = input("Choose: 1- Write coil, 2- Write holding registers: ")
+                typreg = input("Choose: 1- Write coil, 2- Write holding registers, 3- Write holding registers bits: ")
                 if (int(typreg) == 1):
                     addr = input("Address of the coil in the MODBUS table: ")
                     val = input("Value to write: ")
@@ -40,9 +42,13 @@ class Clientinit:
                     addr = input("Address of the holding register in the MODBUS table: ")
                     val = input("Value to write: ")
                     self.writevalue(int(addr), int(typreg), int(val))
-                    listt = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-                    print(self.writebitholding(int(addr), listt))
 
+                if (int(typreg) == 3):
+                    addr = input("Address of the holding register in the MODBUS table: ")
+                    listinput = list()
+                    val = input("Value to write in bits: ")
+                    vallist = [int(c) for c in str(val)] 
+                    self.writebitholding(int(addr), vallist)
 
         except Exception as e:
             print(f'Error: {e.args}') 
@@ -70,7 +76,15 @@ class Clientinit:
         listabit = self.readbitholding(addr)
         listaux = [a & b for a, b in zip (listbitrec, listabit)]
         listasw = [a | b for a, b in zip (listaux, listbitrec)]
-        return listasw
+        intlistbit = [int(c) for c in listasw] 
+        a = 0
+        for c in range (0, 16, 1):
+            a = intlistbit[15-c]*(2**(c)) + a
+        
+        self.floatload.add_32bit_float(a)
+        self.payload = self.floatload.to_registers()
+        
+        self.modclient.write_multiple_registers(addr, self.payload)   
 
     def writevalue (self, addr, typ, val):
         if (int(typ) == 1):
