@@ -1,0 +1,105 @@
+<Calculator>:
+  orientation: 'vertical'
+  BoxLayout:
+    orientation: 'horizontal'
+    id: display
+    size_hint: (1,0.8)
+    Label:
+      id: lab
+      text: '0'
+  BoxLayout:
+    orientation: 'horizontal'
+    id: row1
+    Button:
+      id: del
+      text: 'DEL'
+      background_color: [1,0,0,1]
+    Button:
+      id: oppar
+      text: '('
+      on_press: root.acumulatevalues(self.text); root.showinscreen(self.text)
+    Button:
+      id: clpar
+      text: ')'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: div
+      text: '/'
+      on_press: root.acumulatevalues(self.text)
+  BoxLayout:
+    orientation: 'horizontal'
+    id: row2
+    Button:
+      id: sev
+      text: '7'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: eig
+      text: '8'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: nin
+      text: '9'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: mult
+      text: 'x'
+      on_press: root.acumulatevalues(self.text)
+  BoxLayout:
+    orientation: 'horizontal'
+    id: row3
+    Button:
+      id: for
+      text: '4'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: fiv
+      text: '5'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: six
+      text: '6'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: min
+      text: '-'
+      on_press: root.acumulatevalues(self.text)
+  BoxLayout:
+    orientation: 'horizontal'
+    id: row4
+    Button:
+      id: one
+      text: '1'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: two
+      text: '2'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: thr
+      text: '3'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: plu
+      text: '+'
+      on_press: root.acumulatevalues(self.text)
+  BoxLayout:
+    orientation: 'horizontal'
+    id: row5
+    Button:
+      id: zer
+      text: '0'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: per
+      text: '%'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: dot
+      text: '.'
+      on_press: root.acumulatevalues(self.text)
+    Button:
+      id: eq
+      text: '='
+      background_color: [0,1,0,1]
+
