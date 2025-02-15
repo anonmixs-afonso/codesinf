@@ -2,6 +2,7 @@ import kivy
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
+from kivy.core.window import Window
 
 buffer = list()
 class Calculator(BoxLayout):
@@ -32,5 +33,6 @@ class BasicCalculatorApp(App):
         return Calculator()
 
 if __name__ == '__main__':
+    Window.size = (600, 400)
     Config.set('graphics','resizable',True)
     BasicCalculatorApp().run()
