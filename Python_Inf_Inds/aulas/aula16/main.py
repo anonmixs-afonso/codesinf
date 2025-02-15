@@ -36,3 +36,4 @@ if __name__ == '__main__':
     Window.size = (600, 400)
     Config.set('graphics','resizable',True)
     BasicCalculatorApp().run()
+
