@@ -4,18 +4,39 @@ from pymodbus.constants import Endian
 import numpy as np
 
 class Clientinit:
+    """
+    A class to manage Modbus TCP client operations, including reading and writing values to Modbus registers.
+
+    Attributes:
+    modclient (ModbusClient): The Modbus client object for communicating with a Modbus server.
+    floatload (BinaryPayloadBuilder): A payload builder used for building float payloads.
+    payload (int): Placeholder for a payload value, initialized as 0.
+    """
 
     def __init__ (self, host, port):
+        """
+        Initializes a new instance of the Clientinit class.
+
+        Args:
+            host (str): The host IP address of the Modbus server.
+            port (int): The port number of the Modbus server.
+        """
+
         self.modclient = ModbusClient(host=host, port=port)
         self.floatload = BinaryPayloadBuilder(byteorder=Endian.BIG)
         self.payload = 0
 
     def ihmcli (self):
+        """
+        Provides a command-line interface for interacting with the Modbus client.
 
+        Allows the user to choose between reading and writing values to Modbus registers.
+        Depending on the user's choice, the appropriate read or write operation is performed.
+        """
         self.modclient.open()
         try:
             print("Welcome to SCADA CLI: \n")
-            ch = input("Choose what to do: 1- Read values from registers, 2- Write values to register: ")
+            ch = input("Choose what to do: 1- Read values from registers, 2- Write values to register, 3- Read dict: ")
             if (int(ch) == 1):
                 typreg = input("Choose: 1- Read holding registers (int), 2- Read holding registers (float), 3- Read holding registers bits: ")
                 if (int(typreg) == 1):
@@ -49,14 +70,34 @@ class Clientinit:
                     val = input("Value to write in bits: ")
                     vallist = [int(c) for c in str(val)] 
                     self.writebitholding(int(addr), vallist)
+            if (int(ch) == 3):
+                temp = self.readindict()
+                print(f'Data: {temp}')
 
         except Exception as e:
             print(f'Error: {e.args}') 
+        
+    def readindict (self):
+        #data = {'Voltage RS': self.readvalue(847, 1)}
+        data = {'Tipo Motor': self.readvalue(708, 1), 'Status PID': self.readvalue(722, 1), 
+        'Temperatura SA': self.readvalue(710, 2), 'Velocidade SA': self.readvalue(712, 2), 
+        'Vazão SA': self.readvalue(714, 2), 'Tensão RS': self.readvalue(847, 1)/10, 'Tensao ST': self.readvalue(848, 1)/10,
+        'Tensão TR': self.readvalue(849, 1)/10
+        }
+        return data
 
     def readvalue (self, addr, typ):
+        """
+        Reads a value from a Modbus register.
+
+        Args:
+            addr (int): The address of the register to read.
+            typ (int): The type of register to read (1 for integer, 2 for float).
+
+        Returns:
+            int or float: The value read from the register.
+        """
         if (int(typ) == 1):
-            # decoder = BinaryPayloadDecoder(payload=self.modclient.read_coils(addr, 1), byteorder=Endian.LITTLE)
-            # val = decoder.decode_32bit_float()
             ##Holding
             return self.modclient.read_holding_registers(addr, 1)[0]
             ##Floating
@@ -68,17 +109,28 @@ class Clientinit:
             return val
 
     def readbitholding (self, addr):
-        # decoder = BinaryPayloadDecoder(payload=self.modclient.read_holding_registers(addr, 2), byteorder=Endian.LITTLE)
-        # val = decoder.decode_32bit_float()
-        # binary = np.binary_repr(np.float16(val).view(np.int16), width=16)
-        # listbit = list(str(binary))
-        # intlistbit = [int(c) for c in listbit] 
-        # return intlistbit
+        """
+        Reads a holding register and returns its value as a list of bits.
+
+        Args:
+            addr (int): The address of the holding register to read.
+
+        Returns:
+            list: A list of bits representing the value of the holding register.
+        """
         register = self.modclient.read_holding_registers(addr, 1)[0]
         # Convertendo o valor do registrador para uma lista de bits
         return [int(x) for x in format(register, '016b')]
 
     def writebitholding (self, addr, listbitrec):
+        """
+        Writes a modified value to a holding register based on bit-wise manipulation.
+
+        Args:
+            addr (int): The address of the holding register to write to.
+            listbitrec (list): A list of bits to write to the holding register.
+
+        """
         listabit = self.readbitholding(addr)
         listaux = [a & b for a, b in zip (listbitrec, listabit)]
         listasw = [a | b for a, b in zip (listaux, listbitrec)]
@@ -86,25 +138,24 @@ class Clientinit:
         a = 0
         for c in range (0, 16, 1):
             a = intlistbit[15-c]*(2**(c)) + a
-        
-        # self.floatload.add_32bit_float(a)
-        # self.payload = self.floatload.to_registers()
-        
-        # self.modclient.write_multiple_registers(addr, self.payload) 
         self.modclient.write_single_register(addr, a)  
 
     def writevalue (self, addr, typ, val):
-        # if (int(typ) == 1):
-        #     return self.modclient.write_single_coil(addr, val)
-        # if (int(typ) == 2):
-            # self.floatload.add_16bit_float(val)
-            # self.payload = self.floatload.to_registers()
-           # return self.modclient.write_multiple_registers(addr, self.payload)       
+        """
+        Writes a value to a Modbus register.
 
+        Args:
+            addr (int): The address of the register to write to.
+            typ (int): The type of register (1 for coil, 2 for holding register).
+            val (int): The value to write to the register.
 
+        Returns:
+            bool: True if the value was successfully written to the register, False otherwise.
+        """
+        return self.modclient.write_single_register(addr, val)
         # 1324 -> Inversor(2)
         # 1313 -> Velocidade(600)
         # 1314 -> Rampa ace (100)
         # 1315 -> Rampa des (100)
+        # 1312 -> Partida (1)
 
-        return self.modclient.write_single_register(addr, val)
