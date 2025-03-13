@@ -3,5 +3,5 @@ from server import Serverinit
 
 print("Inicializing Server...\n")
 
-servcall = Serverinit('localhost', 502)
+servcall = Serverinit('localhost', 1502)
 servcall.defineserver()

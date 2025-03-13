@@ -82,7 +82,13 @@ class Clientinit:
         data = {'Tipo Motor': self.readvalue(708, 1), 'Status PID': self.readvalue(722, 1), 
         'Temperatura SA': self.readvalue(710, 2), 'Velocidade SA': self.readvalue(712, 2), 
         'Vazão SA': self.readvalue(714, 2), 'Tensão RS': self.readvalue(847, 1)/10, 'Tensao ST': self.readvalue(848, 1)/10,
-        'Tensão TR': self.readvalue(849, 1)/10
+        'Tensão TR': self.readvalue(849, 1)/10, 'Tipo Partida': self.readvalue(1216, 1), 'Partida Inversor': self.readvalue(1312, 1),
+        'Velocidade Inversor': self.readvalue(1313, 1)/10, 'Rampa Acelereção Inversor': self.readvalue(1314, 1)/10, 'Rampa Desaceleração Inversor': self.readvalue(1315, 1)/10,
+        'Partida Soft': self.readvalue(1316, 1), 'Rampa Aceleraçãp Soft': self.readvalue(1317, 1), 'Rampa Desaceleração Soft': self.readvalue(1318, 1),
+        'Partida Direta': self.readvalue(1319, 1), 'Tipo Partida': self.readvalue(1324, 1), 'Tipo PID': self.readvalue(1332, 1), 'Status 1230': self.readbitholding(1230),
+        'Status 1231': self.readbitholding(1231), 'Temperatura TIT-02': self.readvalue(1218, 2)/10, 'Temperatura TIT-01': self.readvalue(1220, 2)/10, 'Pressão PIT-02': self.readvalue(1222, 2)/10, 
+        'Pressão PIT-01': self.readvalue(1224, 2)/10, 'Pressão PIT-03': self.readvalue(1226, 2)/10,  'Controle 1328': self.readbitholding(1328), 'Controle 1329': self.readbitholding(1329),
+        'Status Compressor': self.readbitholding(1330), 'Temperatura Termostato': self.readvalue(1338, 1), 'Vazão PID': self.readvalue(1302, 2)
         }
         return data
 
