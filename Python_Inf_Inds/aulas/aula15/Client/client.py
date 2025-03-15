@@ -164,4 +164,3 @@ class Clientinit:
         # 1314 -> Rampa ace (100)
         # 1315 -> Rampa des (100)
         # 1312 -> Partida (1)
-
